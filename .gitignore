@@ -17,3 +17,6 @@ data/
 
 # Old notebooks before cleaning up
 old/
+
+# R package management
+renv/
