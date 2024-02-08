@@ -1,14 +1,14 @@
 from common_variables import *
-
 from sentence_transformers import SentenceTransformer, util
-
-
-model_t = SentenceTransformer(transformer_model) #from common_variables
-
+import pandas as pd
+import numpy as np
+from sklearn.manifold import TSNE
+import umap
+from collections import Counter
 
 ## CLEAN UP THE HEROKU DATA
 
-def process_file(data, out_path, chain=True):
+def process_file(data, out_path, chain=True, story_original=story_original):
     """
     Processes and cleans up data from a Heroku database, then writes the cleaned data to a file.
 
@@ -29,10 +29,12 @@ def process_file(data, out_path, chain=True):
     None. The function writes the cleaned data to the specified file path.
     """
 
+    
+    
     # Open or create the file at out_path for writing
-    with open(out_path, "w+") as f:
+    with open(out_path,"w+") as f:
         # Write the header row to the file
-        f.write("{}\t{}\t{}\t{}\t{}\t{}\n".format("layer_n", "rep", "story1", "story2", "story3", "story_merged"))
+        f.write("{}\t{}\t{}\t{}\t{}\t{}\n".format("layer_n","rep","story1","story2","story3","story_merged"))
 
         # Iterate over each replication factor in the data
         for i, rep in data.groupby("replication"):
@@ -44,7 +46,7 @@ def process_file(data, out_path, chain=True):
                 story_merged = row["response"]  # The merged story response
                 # If this is the first generation, initialize all story versions to the original story
                 if gen < 1:
-                    story1, story2, story3 = story_merged, story_merged, story_merged
+                    story1, story2, story3 = story_original, story_original, story_original
                 else:
                     # For subsequent generations, determine the story versions based on the 'chain' parameter
                     if chain:
@@ -96,10 +98,6 @@ def create_embeddings(results, transformer_model=transformer_model, path=f"{path
     return emb
 
 def project_embeddings(emb, path=f"{path_text_embeddings}/X_story_embedded_"):
-
-    from sklearn.manifold import TSNE
-    import umap
-
     # Project to TSNE 
     X_embedded = TSNE(random_state=42, n_components=2, learning_rate='auto', n_jobs=-1).fit_transform(emb)
     np.save(f"{path}_tsne.npy", X_embedded)

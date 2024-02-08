@@ -4,6 +4,9 @@ import pandas as pd
 import scipy as sp
 import scipy.stats as st
 
+from scipy.stats import binom 
+
+
 def create_prob(prob, beta_n_observed=model_data.beta_n_observed, beta_network=model_data.beta_network,
     n_remembered=1, network=0, n_words=265, beta_n_words=model_data.beta_n_words,
     chain_less_words_factor=3,story_length=model_data.story_length):
@@ -350,6 +353,8 @@ def deterministic_model(p, p_after, max_generations=6):
 
 
 def deterministic_model_plot(k, xmin=0.5, generations=1):
+    import seaborn as sns
+    import pylab as plt
     colors = sns.color_palette("Greens",k)
     
     #Probability of remembering

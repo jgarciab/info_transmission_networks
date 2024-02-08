@@ -8,7 +8,6 @@ import itertools
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-model_t = SentenceTransformer(transformer_model) #from common_variables
 import pickle
 global_emb = pickle.load(open(f"{path_text_embeddings}/story_embeddings_global_emb.pickle", "rb"))
 

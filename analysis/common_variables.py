@@ -1,6 +1,9 @@
 from pathlib import Path
+from sentence_transformers import SentenceTransformer
 
 transformer_model = 'sentence-transformers/all-mpnet-base-v2'
+model_t = SentenceTransformer(transformer_model) #from common_variables
+
 
 # Path data
 path_data_files = "../data/"
