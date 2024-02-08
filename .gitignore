@@ -14,3 +14,6 @@ ipython_config.py
 
 # Data
 data/
+
+# Old notebooks before cleaning up
+old/
