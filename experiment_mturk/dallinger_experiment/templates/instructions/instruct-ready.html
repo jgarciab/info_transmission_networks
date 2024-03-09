@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <div class="main_div" id = 'instruct_ready_div'>
+        <div id='trial_by_trial'>
+          <p id = 'trial-count' class = 'computer_number'>Instructions page <span>1 of 1</span></p>
+        </div>
+        <h1>Instructions</h1>
+
+        <hr>
+
+        <p id = 'initial_paragraph'></p>
+        <p>
+          In addition to the base payment of $2.25, you can earn an additional bonus of up to $1.00. 
+          Your bonus will be determined by the quality of your responses. 
+          Failure to complete the task as described may prevent you from receiving the full bonus. 
+          However, most participants who completed the experiment in the past received the full bonus.
+        </p>
+        <hr>
+
+        <div>
+            <div class="row">
+                <div class="col-xs-10"></div>
+                <div class="col-xs-2">
+                    <button type="button" id = 'begin-button' class="btn btn-success btn-lg">
+                    Begin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- <script src="../../static/scripts/setup.js"></script> -->
+    <script>
+
+      let curr_generation, generation_size, read_multiple_versions, num_stories_to_read;
+
+      function getNumStoriesToRead(generation,read_multiple_versions,generation_size,replication){
+        if (read_multiple_versions === 0 && generation === 0) return 1;
+        if (replication % 4 === 0) return 1;
+        return generation_size;
+      }
+
+      function fail(rejection){
+          // A 403 is our signal that it's time to go to the exit
+          if (rejection.status === 403) {
+            dallinger.allowExit();
+            dallinger.goToPage('end');
+          } else {
+            dallinger.error(rejection);
+          }
+      }
+
+      // Create the agent.
+      function createParticipantAndAgent() {
+          dallinger.createParticipant()
+              .done(function(){
+                  dallinger.createAgent()
+                  .done(function (resp) {
+                      sessionStorage.setItem('node_id',resp.node.id);
+                      curr_generation = +resp.node.property3;
+                      sessionStorage.setItem('generation',curr_generation);
+                      const replication = resp.node.property5;
+                      sessionStorage.setItem('replication',resp.node.property5);
+                      sessionStorage.setItem('participant_index',resp.node.property4);
+                      const participantId = dallinger.identity.participantId;
+                      dallinger.get(`/kickOutParticipant/${participantId}/`)
+                        .done(function(resp){
+                          if (resp.kicked_out === true) {
+                            dallinger.allowExit();
+                            dallinger.goToPage('end');
+                          } else {
+                            dallinger.getExperimentProperty('generation_size')
+                              .done(function (propertiesResp) {
+                                  generation_size = +propertiesResp.generation_size;
+                                  sessionStorage.setItem('generation_size',generation_size);
+                                  dallinger.getExperimentProperty('read_multiple_versions')
+                                  .done(function(propertiesResp){
+                                      read_multiple_versions = propertiesResp.read_multiple_versions;
+                                      sessionStorage.setItem('read_multiple_versions',read_multiple_versions);
+                                      num_stories_to_read = getNumStoriesToRead(curr_generation,read_multiple_versions,generation_size,replication);
+                                      sessionStorage.setItem('num_stories_to_read',num_stories_to_read);
+                                      pageSetup();
+                                    }).fail(function (rejection) { fail(rejection) });
+                            }).fail(function (rejection) { fail(rejection) });
+                          }
+                      }).fail(function(rejection){fail(rejection)});
+                  }).fail(function (rejection) { fail(rejection) });
+              }).fail(function(rejection){fail(rejection)});
+        };
+
+        function pageSetup(){
+          $('#begin-button').addClass('disabled')
+          const generation_text = ['a passage','two passages','three passages','four passages'][num_stories_to_read-1];
+          $('#begin-button').removeClass('disabled')
+          $('#initial_paragraph').html('In this experiment, you will read ' + generation_text + ' of text. We will then ask you some questions about what you read.')
+          $('#instruct_ready_div').css('display','block');
+          $('#begin-button').on('click',function(){
+            $('#begin-button').addClass('disabled');
+            //window.location = '/exp' + window.location.search;
+            dallinger.goToPage('exp');
+          })
+        }
+
+        createParticipantAndAgent();
+    </script>
+{% endblock %}
