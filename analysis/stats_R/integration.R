@@ -1,27 +1,66 @@
 library(dplyr)
 library(lme4)
 library(texreg)
+library(readr)
 
 # Save to use in next analysis
 path_data_files = "/Users/garci061/pCloud Drive/projects/2018_rumor/info_transmission_networks/data/"
 path_figures = ".../results"
 
-
+fear_words <- read_delim(paste0(path_data_files,"data_processing/NRC_emotion_fear_words.csv"), delim = ",", show_col_types = FALSE, col_names = FALSE)#, skip = 2) 
+names(fear_words) <- c("word", "count")
+fear_words$fear <- 1
+fear_words
 
 results <- read_delim(paste0(path_data_files,"data_processing/transmissions_word_level.csv"), delim = ",", show_col_types = FALSE) 
-
+results$number_stories_observed <- as.factor(results$number_stories_observed)
+results <- left_join(results, fear_words)
+results$fear <- tidyr::replace_na(results$fear, 0)
 ## Models of transmission
+
 
 # No RE (AIC 39750.21)
 formula3 = transmitted ~  number_stories_observed  + condition + log(number_words_read) 
 mod3 <- glm(formula3, data = results, family="binomial")
 mod3$aic
 
+# Random intercepts 
+formula2_c = transmitted ~   log(number_words_read)  + (1 | word) 
+mod2_c <- glmer(formula2_c, data = results |> filter(condition == "Chain", layer_n > 1), family="binomial")
+summary(mod2_c)
+
+# Random intercepts 
+formula2_n = transmitted ~  I(number_stories_observed) + log(number_words_read)  + (1 | word) - 1
+mod2_n <- glmer(formula2_n, data = results |> filter(condition == "Network", layer_n > 1), family="binomial")
+summary(mod2_n)
+
+# Random intercepts 
+formula2_b = transmitted ~ number_stories_observed*condition + log(number_words_read)  + (1 | word) - 1
+mod2_b <- glmer(formula2_b, data = results |> filter(layer_n > 1), family="binomial")
+summary(mod2_b)
+
+exp(fixef(mod2_b))
+
+# Random intercepts 
+formula2_b_fear = transmitted ~  fear + I(number_stories_observed)*condition + log(number_words_read)*condition  + (1 | word) - 1
+mod2_b_fear <- glmer(formula2_b_fear, data = results |> filter(layer_n > 1), family="binomial", control = glmerControl(optimizer = "Nelder_Mead"))
+summary(mod2_b_fear)
+summary(mod2_b_fear)$AICtab
+summary(mod2_b)$AICtab
+
+# Random intercepts 
+formula2_b_fear = transmitted ~  fear + log(number_words_read)  + (1 | word) 
+mod2_b_fear <- glmer(formula2_b_fear, data = results |> filter(layer_n == 1), family="binomial", control = glmerControl(optimizer = "Nelder_Mead"))
+summary(mod2_b_fear)
+
 # Random intercepts (AIC 33739.82)
 formula2 = transmitted ~  number_stories_observed  + condition + log(number_words_read)  + (1 | word)  
 mod2 <- glmer(formula2, data = results, family="binomial")
 summary(mod2)$AICtab
 
+exp(fixef(mod2_b))
+
+results |> group_by(condition, layer_n) |> summarize(mean(number_words_read))
 
 # RAndom slopes and intercepts (AIC = 33592.32)
 formula1 = transmitted ~  number_stories_observed   + condition + log(number_words_read)  + (1 + number_stories_observed|word)  
