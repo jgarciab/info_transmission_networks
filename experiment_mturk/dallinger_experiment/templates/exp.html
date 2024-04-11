@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block body %}    
+    <style>
+    .preventcopy {
+      -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+         -khtml-user-select: none; /* Konqueror HTML */
+           -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none; /* Non-prefixed version, currently
+                                      supported by Chrome and Opera */
+    }
+    </style>
+
+    <div class="main_div">
+        <div id='trial_by_trial'>
+            <p id = 'trial-count' class = 'computer_number'></p>
+            <!-- <p id ='trial_info_2' class = 'computer_number'></p>
+            <p id ='trial_info_3' class = 'computer_number'></p> -->
+        </div>
+        <div id="stimulus">
+            <h2 id ='header-text'></h2>
+            <div><blockquote id="story"><p><b>Loading story ... </b></p></blockquote></div>
+            <button id="finish-reading" type="button" class="btn btn-primary">I'm done reading</button>
+        </div>
+
+
+        <div id="intermediary_task" style="display:none;">
+            <h2>What is the result of the following operation: 179+240=?</h2>
+            <textarea rows="2"></textarea>
+            <button id="task-completed" type="button" class="btn btn-primary">Continue</button>
+        </div>
+
+
+        <div id="response-form" style="display:none;">
+            <p id ='response-header'><p>
+            <textarea maxlength="3000" id="reproduction" class="form-control disablecopypaste" rows="10"></textarea>
+            <p></p>
+            <button id="submit-response" type="button" class="btn btn-primary">Submit response.</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="../../static/scripts/experiment.js"></script>
+{% endblock %}
