@@ -11,9 +11,6 @@ ipython_config.py
 .Rproj.user
 *.key
 
-# Data
-data/
-
 # Old notebooks before cleaning up
 old/
 
