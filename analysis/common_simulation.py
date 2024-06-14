@@ -160,9 +160,7 @@ def jaccard_similarity(a,b):
     if (np.sum(a|b)==0):
         jaccard_sim=0
     else:
-        extra_words = np.sum(a|b)
-            
-        jaccard_sim=np.sum(a&b)/extra_words
+        jaccard_sim=np.sum(a&b)/np.sum(a|b)
         # jaccard_sim=2*np.sum((a&b))/265
     return jaccard_sim
 
