@@ -469,7 +469,7 @@ def simulate_net(prob, beta_n_observed=model_data.beta_n_observed, layers=6,
 def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w = 20, extra_intro_rate = 0.05, 
                         extra_baseline_prob = 0.1, netcolor='#3d348b', chaincolor='#e6af2e'):
     """
-    Simulates chain and network conditions of experiment.
+    Simulates Single-pathway (chain) and Multiple-pathway (network) conditions of experiment.
     
     Parameters:
     - prob (float list): list of baseline probability values for words in the original text
@@ -479,8 +479,8 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
     - extra_w (int): number of extra words that can be added to the story from a set dictionary.
     - extra_intro_rate (float): probability for new words to be introduced at each generation.
     - extra_baseline_prob (float): delta - baseline probability for all newly added words.
-    - netcolor (color string): hexcode for colour of plotted network condition data
-    - chaincolor (color string): hexcode for colour of plotted chain condition data
+    - netcolor (color string): hexcode for colour of plotted Multiple-pathway condition data
+    - chaincolor (color string): hexcode for colour of plotted Single-pathway condition data
     
     Returns:
     null
@@ -510,7 +510,7 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
     words_n = np.zeros((n_reps,layers))
     words_c = np.zeros((n_reps,layers))
 
-    #     Simulate chain and network conditions for each replicate
+    #     Simulate Single-pathway and Multiple-pathway conditions for each replicate
     for i in range(n_reps):      
         sc = simulate_chain(prob, beta_n_observed=model_data.beta_n_observed, layers=layers, 
                        story_length=total_length, seed_length=seed_length, introduction_rate=extra_intro_rate)
@@ -519,7 +519,7 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
         all_results_n.append(sn)
         all_results_c.append(sc)
 
-    #     compute averages for chain and network conditions in each replicate
+    #     compute averages for Single-pathway and Multiple-pathway conditions in each replicate
     for i in range(n_reps): 
         results_n[i,:] = all_results_n[i][:, -1, :].mean(1)
         results_c[i,:] = all_results_c[i][:, -1]
@@ -532,8 +532,8 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
     
 #     Plot word frequency for each word in each condition
     ax1 = fig1.add_subplot(1,3,1)
-    ax1.plot(prob,results_n,".",label="Network",color=netcolor)
-    ax1.plot(prob,results_c,".",label="Chain",color=chaincolor)
+    ax1.plot(prob,results_n,".",label="Multiple-pathway",color=netcolor)
+    ax1.plot(prob,results_c,".",label="Single-pathway",color=chaincolor)
     ax1.legend()
     ax1.set_xlabel("$p_{i,1}$, Baseline probability")
     if ylabel:
@@ -543,8 +543,8 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
 
 #     Plot average number of words for each condition
     ax2 = fig2.add_subplot(1,3,1)
-    ax2.plot(range(layers),words_n.mean(0),label="Network",color=netcolor)
-    ax2.plot(range(layers),words_c.mean(0),label="Chain",color=chaincolor)
+    ax2.plot(range(layers),words_n.mean(0),label="Multiple-pathway",color=netcolor)
+    ax2.plot(range(layers),words_c.mean(0),label="Single-pathway",color=chaincolor)
     ax2.legend()
     ax2.set_xlabel("$k$, Generation")
     if ylabel:
@@ -565,9 +565,9 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
     
 #     Plot replicate similarities with confidence intervals
     ax3 = fig3.add_subplot(1,3,1)
-    ax3.plot(range(1, layers+1),sim_n,label="Network",marker='o',color=netcolor)
+    ax3.plot(range(1, layers+1),sim_n,label="Multiple-pathway",marker='o',color=netcolor)
     ax3.fill_between(range(1, layers+1), y1=sim_n_ci_lower,y2=sim_n_ci_upper, alpha=0.3)
-    ax3.plot(range(1, layers+1),sim_c,label="Chain",marker='o',color=chaincolor)
+    ax3.plot(range(1, layers+1),sim_c,label="Single-pathway",marker='o',color=chaincolor)
     ax3.fill_between(range(1, layers+1), y1=sim_c_ci_lower,y2=sim_c_ci_upper, alpha=0.3)
     ax3.legend()
     ax3.set_xlabel("$k$, Generation")
@@ -587,9 +587,9 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
 
     #     Plot seed similarities with confidence intervals
     ax4 = fig4.add_subplot(1,3,1)
-    ax4.plot(range(1, layers+1),sim_n,label="Network",marker='o',color=netcolor)
+    ax4.plot(range(1, layers+1),sim_n,label="Multiple-pathway",marker='o',color=netcolor)
     ax4.fill_between(range(1, layers+1), y1=sim_n_ci_lower,y2=sim_n_ci_upper, alpha=0.3)
-    ax4.plot(range(1, layers+1),sim_c,label="Chain",marker='o',color=chaincolor)
+    ax4.plot(range(1, layers+1),sim_c,label="Single-pathway",marker='o',color=chaincolor)
     ax4.fill_between(range(1, layers+1), y1=sim_c_ci_lower,y2=sim_c_ci_upper, alpha=0.3)
     ax4.legend()
     ax4.set_xlabel("$k$, Generation")
@@ -598,11 +598,12 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
     sns.despine(ax=ax4, bottom=True, left=True)
     ax4.grid(axis="y")
 
-# OPTIONAL - SAVE FIGURES 
-    # fig1.savefig(f"{figures_path}sim_cm1.pdf", bbox_inches="tight")   
-    # fig3.savefig(f"{figures_path}sim_cm2.pdf", bbox_inches="tight")   
-#     fig3.savefig(f"{figures_path}sim_cm3.pdf", bbox_inches="tight")   
-#     fig4.savefig(f"{figures_path}sim_cm4.pdf", bbox_inches="tight")  
+# OPTIONAL - SAVE FIGURES TO results FOLDER
+    figures_path="results/"
+#     fig1.savefig(f"{figures_path}ABM_initialWordDistribution.pdf", bbox_inches="tight")   
+#     fig3.savefig(f"{figures_path}ABM_.pdf", bbox_inches="tight")   
+    fig3.savefig(f"{figures_path}ABM_replicatesimilarity.pdf", bbox_inches="tight")   
+    fig4.savefig(f"{figures_path}ABM_seedsimilarity.pdf", bbox_inches="tight")  
 
 
 
