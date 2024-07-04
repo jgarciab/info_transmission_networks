@@ -110,7 +110,7 @@ def create_prob(prob, beta_n_observed=model_data.beta_n_observed, beta_network=m
     - beta_n_words (float, optional): beta_S - parameter for number of words read. 
     - network (int, optional): C - Indicates whether the data is in a network (1) or not (0). Default is 0.
     - n_words (int, optional): n_w - Number of words in the original text. Default is 265.
-    - n_remembered (float, optional): N - number of times the event is remembered. Default is 1.
+    - n_remembered (int, optional): N - number of times the event is remembered. Default is 1.
     - story_length (int, optional): S: current number of words in story
     
     Returns:
@@ -121,10 +121,11 @@ def create_prob(prob, beta_n_observed=model_data.beta_n_observed, beta_network=m
     n_words=np.where(n_words>0, n_words, 1)
     
 #     TESTING if n_remembered is a list (chain vs network conditions)
-    if isinstance(n_remembered, int):
+    if isinstance(n_remembered, (int, np.integer)):
         n_remembered_vec=int(n_remembered>0) # Indicates whether at least 1 person remembered
         beta_n_observed_vec=beta_n_observed[n_remembered-1] # selects parameter value corresponding to N
     else:
+        print("vec")
         n_remembered_vec=np.array([int(k>0) for k in n_remembered])
         beta_n_observed_vec=np.array([beta_n_observed[k-1] for k in n_remembered])
         
