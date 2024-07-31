@@ -58,14 +58,14 @@ def deterministic_model_plot(k, xmin=0.5, generations=1):
         c = colors.pop(0)
     
         #Binomial uses probability of forgetting (0 = all remember, 1 = at least one remember)
-        plt.plot(p_values,binom.cdf(i,k,1-p_values)**generations,"-",color=c,label=label,lw=2)
+        plt.plot(p_values,binom.cdf(i,k,1-p_values)**generations,"--",color=c,label=label,lw=2)
     
         
 
     #1:1 line
     #plt.plot([xmin,1],[1,1],"--",color="gray",zorder=0)
-    plt.plot(p_values,p_values**generations,"--",color="gold",label=None,zorder=0)
-    plt.plot(p_values,p_values,"--",color="gray",label=None,zorder=0)
+#     plt.plot(p_values,p_values**generations,":",color="gold",label=None,zorder=0)
+    plt.plot(p_values,p_values,"--",color="lightgray",label=None,zorder=0)
 
     #plt.yscale("log")
     
@@ -125,7 +125,6 @@ def create_prob(prob, beta_n_observed=model_data.beta_n_observed, beta_network=m
         n_remembered_vec=int(n_remembered>0) # Indicates whether at least 1 person remembered
         beta_n_observed_vec=beta_n_observed[n_remembered-1] # selects parameter value corresponding to N
     else:
-        print("vec")
         n_remembered_vec=np.array([int(k>0) for k in n_remembered])
         beta_n_observed_vec=np.array([beta_n_observed[k-1] for k in n_remembered])
         
@@ -468,7 +467,7 @@ def simulate_net(prob, beta_n_observed=model_data.beta_n_observed, layers=6,
 
 
 def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w = 20, extra_intro_rate = 0.05, 
-                        extra_baseline_prob = 0.1, netcolor='#3d348b', chaincolor='#e6af2e'):
+                        extra_baseline_prob = 0.1, netcolor='#3d348b', chaincolor='#e6af2e',protected=False):
     """
     Simulates Single-pathway (chain) and Multiple-pathway (network) conditions of experiment.
     
@@ -496,10 +495,10 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
     plt.yscale("log")
     
     # Define plots
-    fig1 = plt.figure(figsize=(16,3))
-    fig2 = plt.figure(figsize=(16,3))
-    fig3 = plt.figure(figsize=(16,3))
-    fig4 = plt.figure(figsize=(16,3))
+#     fig1 = plt.figure(figsize=(16,3))
+#     fig2 = plt.figure(figsize=(16,3))
+#     fig3 = plt.figure(figsize=(16,3))
+#     fig4 = plt.figure(figsize=(16,3))
     
     ylabel=True
 
@@ -519,14 +518,305 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
                        story_length=total_length, seed_length=seed_length, introduction_rate=extra_intro_rate)
         all_results_n.append(sn)
         all_results_c.append(sc)
+    
+#     SAVE RAW DATA
+    np.savetxt("../data/simulation_data/prob_data.csv", prob, delimiter=",")
+    np.save("../data/simulation_data/multi-path_data", all_results_n)
+    np.save("../data/simulation_data/single-path_data", all_results_c)
 
-    #     compute averages for Single-pathway and Multiple-pathway conditions in each replicate
+    
+    
+#     #     compute averages for Single-pathway and Multiple-pathway conditions in each replicate
+#     for i in range(n_reps): 
+#         results_n[i,:] = all_results_n[i][:, -1, :].mean(1)
+#         results_c[i,:] = all_results_c[i][:, -1]
+#         words_n[i,:] = all_results_n[i].mean(2).sum(0)
+#         words_c[i,:] = all_results_c[i].sum(0)
+    
+
+    
+#     # average across replicates
+#     results_n = results_n.mean(0)
+#     results_c = results_c.mean(0)
+    
+# #     Plot word frequency for each word in each condition
+#     ax1 = fig1.add_subplot(1,3,1)
+#     ax1.plot(prob,results_n,".",label="Multiple-pathway",color=netcolor)
+#     ax1.plot(prob,results_c,".",label="Single-pathway",color=chaincolor)
+#     ax1.legend()
+#     ax1.set_xlabel("$p_{i,1}$, Baseline probability")
+#     if ylabel:
+#         ax1.set_ylabel(f"Word frequency in layer {layers}")
+#     sns.despine(ax=ax1)
+#     ax1.plot([0,1],[0,1],"--",color="lightgray")
+
+# #     Plot average number of words for each condition
+#     ax2 = fig2.add_subplot(1,3,1)
+#     ax2.plot(range(layers),words_n.mean(0),label="Multiple-pathway",color=netcolor)
+#     ax2.plot(range(layers),words_c.mean(0),label="Single-pathway",color=chaincolor)
+#     ax2.legend()
+#     ax2.set_xlabel("$k$, Generation")
+#     if ylabel:
+#         ax2.set_ylabel("Number of words")
+#     sns.despine(ax=ax2)
+
+#     #     Compute replicate similarities along with confidence intervals for each condition 
+#     sim_n = calculate_similarity(all_results_n) 
+#     sim_c = calculate_similarity(all_results_c) 
+#     sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n)
+#     sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c)
+#     yerr_n=np.empty((2,layers))
+#     yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
+#     yerr_n[1,:]=np.array(sim_n_ci_upper)-sim_n
+#     yerr_c=np.empty((2,layers))
+#     yerr_c[0,:]=sim_c-np.array(sim_c_ci_lower)
+#     yerr_c[1,:]=np.array(sim_c_ci_upper)-sim_c
+    
+# #     Plot replicate similarities with confidence intervals
+#     ax3 = fig3.add_subplot(1,3,1)
+#     ax3.plot(range(1, layers+1),sim_n,label="Multiple-pathway",marker='o',color=netcolor)
+#     ax3.fill_between(range(1, layers+1), y1=sim_n_ci_lower,y2=sim_n_ci_upper, alpha=0.3)
+#     ax3.plot(range(1, layers+1),sim_c,label="Single-pathway",marker='o',color=chaincolor)
+#     ax3.fill_between(range(1, layers+1), y1=sim_c_ci_lower,y2=sim_c_ci_upper, alpha=0.3)
+#     ax3.legend()
+#     ax3.set_xlabel("$k$, Generation")
+#     if ylabel:
+#         ax3.set_ylabel("$\\theta_r$, Replicate-similarity")
+#     sns.despine(ax=ax3, bottom=True, left=True)
+#     ax3.grid(axis="y")
+#     [ymin, ymax] = ax3.get_ylim()
+#     ax3.set_ylim([0, ymax])
+
+#     #     Compute seed similarities along with confidence intervals for each condition 
+#     sim_n = calculate_similarity(all_results_n, original=True,story_length=seed_length) 
+#     sim_c = calculate_similarity(all_results_c, original=True,story_length=seed_length) 
+#     sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n, original=True,story_length=seed_length)
+#     sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c, original=True,story_length=seed_length)
+#     yerr_=np.empty((2,layers))
+#     yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
+#     yerr_c[1,:]=np.array(sim_n_ci_upper)-sim_n
+
+#     #     Plot seed similarities with confidence intervals
+#     ax4 = fig4.add_subplot(1,3,1)
+#     ax4.plot(range(1, layers+1),sim_n,label="Multiple-pathway",marker='o',color=netcolor)
+#     ax4.fill_between(range(1, layers+1), y1=sim_n_ci_lower,y2=sim_n_ci_upper, alpha=0.3)
+#     ax4.plot(range(1, layers+1),sim_c,label="Single-pathway",marker='o',color=chaincolor)
+#     ax4.fill_between(range(1, layers+1), y1=sim_c_ci_lower,y2=sim_c_ci_upper, alpha=0.3)
+#     ax4.legend()
+#     ax4.set_xlabel("$k$, Generation")
+#     if ylabel:
+#         ax4.set_ylabel("$\\theta_s$, Seed-similarity")
+#     sns.despine(ax=ax4, bottom=True, left=True)
+#     ax4.grid(axis="y")
+#     [ymin, ymax] = ax4.get_ylim()
+#     ax4.set_ylim([0, ymax])
+
+# # OPTIONAL - SAVE FIGURES TO results FOLDER
+#     figures_path="results/"
+# #     fig1.savefig(f"{figures_path}ABM_initialWordDistribution.pdf", bbox_inches="tight")   
+# #     fig3.savefig(f"{figures_path}ABM_.pdf", bbox_inches="tight")   
+# #     fig3.savefig(f"{figures_path}ABM_replicatesimilarity.pdf", bbox_inches="tight")   
+# #     fig4.savefig(f"{figures_path}ABM_seedsimilarity.pdf", bbox_inches="tight")  
+
+def process_raw_sim_data(data_path="../data/simulation_data/",netcolor='#3d348b', chaincolor='#e6af2e',layers = 6,
+                       seed_length=265, n_reps = 100, extra_w = 20, extra_intro_rate = 0.05, extra_baseline_prob = 0.1):
+    prob=np.loadtxt(data_path+"prob_data.csv",delimiter=",")
+    
+    all_results_n = np.load(data_path+"multi-path_data.npy")
+    all_results_c = np.load(data_path+"single-path_data.npy")
+
+    total_length = seed_length + extra_w
+    
+    results_n = np.zeros((n_reps,total_length))
+    results_c = np.zeros((n_reps,total_length))
+    words_n = np.zeros((n_reps,layers))
+    words_c = np.zeros((n_reps,layers))
+    
     for i in range(n_reps): 
         results_n[i,:] = all_results_n[i][:, -1, :].mean(1)
         results_c[i,:] = all_results_c[i][:, -1]
         words_n[i,:] = all_results_n[i].mean(2).sum(0)
         words_c[i,:] = all_results_c[i].sum(0)
+        
+#     Compute replicate similarity
+    sim_n = calculate_similarity(all_results_n) 
+    sim_c = calculate_similarity(all_results_c) 
+    sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n)
+    sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c)
+    #     Save data
+    np.save("../data/simulation_data/multi-path_data_rep_similarity", sim_n)
+    np.save("../data/simulation_data/single-path_data_rep_similarity", sim_c)
+    np.save("../data/simulation_data/multi-path_data_rep_similarity_CI_lower", sim_n_ci_lower)
+    np.save("../data/simulation_data/multi-path_data_rep_similarity_CI_upper", sim_n_ci_upper)
+    np.save("../data/simulation_data/single-path_data_rep_similarity_CI_lower", sim_c_ci_lower)
+    np.save("../data/simulation_data/single-path_data_rep_similarity_CI_upper", sim_c_ci_upper)
 
+    #     Compute seed similarity
+    sim_n = calculate_similarity(all_results_n, original=True,story_length=seed_length) 
+    sim_c = calculate_similarity(all_results_c, original=True,story_length=seed_length) 
+    sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n, original=True,story_length=seed_length)
+    sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c, original=True,story_length=seed_length)
+    #     Save data
+    np.save("../data/simulation_data/multi-path_data_seed_similarity", sim_n)
+    np.save("../data/simulation_data/single-path_data_seed_similarity", sim_c)
+    np.save("../data/simulation_data/multi-path_data_seed_similarity_CI_lower", sim_n_ci_lower)
+    np.save("../data/simulation_data/multi-path_data_seed_similarity_CI_upper", sim_n_ci_upper)
+    np.save("../data/simulation_data/single-path_data_seed_similarity_CI_lower", sim_c_ci_lower)
+    np.save("../data/simulation_data/single-path_data_seed_similarity_CI_upper", sim_c_ci_upper)
+    
+    
+    
+    
+def load_and_plot_protected_data(data_path="../data/protected_simulation_data/",netcolor='#3d348b', chaincolor='#e6af2e',layers = 6,
+                       seed_length=265, n_reps = 100, extra_w = 20, extra_intro_rate = 0.05, extra_baseline_prob = 0.1):
+    
+    # Define plots
+    fig1 = plt.figure(figsize=(16,3))
+    fig2 = plt.figure(figsize=(16,3))
+    fig3 = plt.figure(figsize=(16,3))
+    fig4 = plt.figure(figsize=(16,3))
+   
+    prob=np.loadtxt(data_path+"prob_data.csv",delimiter=",")
+    total_length = seed_length + extra_w
+    
+    ylabel=True
+    
+    
+    all_results_n = np.load(data_path+"multi-path_data.npy")
+    all_results_c = np.load(data_path+"single-path_data.npy")
+    
+    results_n = np.zeros((n_reps,total_length))
+    results_c = np.zeros((n_reps,total_length))
+    words_n = np.zeros((n_reps,layers))
+    words_c = np.zeros((n_reps,layers))
+    
+    for i in range(n_reps): 
+        results_n[i,:] = all_results_n[i][:, -1, :].mean(1)
+        results_c[i,:] = all_results_c[i][:, -1]
+        words_n[i,:] = all_results_n[i].mean(2).sum(0)
+        words_c[i,:] = all_results_c[i].sum(0)
+    
+    # average across replicates
+    results_n = results_n.mean(0)
+    results_c = results_c.mean(0)
+    
+#     Plot word frequency for each word in each condition
+    ax1 = fig1.add_subplot(1,3,1)
+    ax1.plot(prob,results_n,".",label="Multiple-pathway",color=netcolor)
+    ax1.plot(prob,results_c,".",label="Single-pathway",color=chaincolor)
+    ax1.legend()
+    ax1.set_xlabel("$p_{i,1}$, Baseline probability")
+    if ylabel:
+        ax1.set_ylabel(f"Word frequency in layer {layers}")
+    sns.despine(ax=ax1)
+    ax1.plot([0,1],[0,1],"--",color="lightgray")
+
+#     Plot average number of words for each condition
+    ax2 = fig2.add_subplot(1,3,1)
+    ax2.plot(range(layers),words_n.mean(0),label="Multiple-pathway",color=netcolor)
+    ax2.plot(range(layers),words_c.mean(0),label="Single-pathway",color=chaincolor)
+    ax2.legend()
+    ax2.set_xlabel("$k$, Generation")
+    if ylabel:
+        ax2.set_ylabel("Number of words")
+    sns.despine(ax=ax2)
+
+#     Load replicate similarity data
+    sim_n = np.load(data_path+"multi-path_data_rep_similarity.npy")
+    sim_c = np.load(data_path+"single-path_data_rep_similarity.npy")
+    sim_n_ci_lower = np.load(data_path+"multi-path_data_rep_similarity_CI_lower.npy")
+    sim_n_ci_upper=np.load(data_path+"multi-path_data_rep_similarity_CI_upper.npy")
+    sim_c_ci_lower=np.load(data_path+"single-path_data_rep_similarity_CI_lower.npy")
+    sim_c_ci_upper=np.load(data_path+"single-path_data_rep_similarity_CI_upper.npy")
+    
+    yerr_n=np.empty((2,layers))
+    yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
+    yerr_n[1,:]=np.array(sim_n_ci_upper)-sim_n
+    yerr_c=np.empty((2,layers))
+    yerr_c[0,:]=sim_c-np.array(sim_c_ci_lower)
+    yerr_c[1,:]=np.array(sim_c_ci_upper)-sim_c
+    
+#     Plot replicate similarities with confidence intervals
+    ax3 = fig3.add_subplot(1,3,1)
+    ax3.plot(range(1, layers+1),sim_n,label="Multiple-pathway",marker='o',color=netcolor)
+    ax3.fill_between(range(1, layers+1), y1=sim_n_ci_lower,y2=sim_n_ci_upper, alpha=0.3)
+    ax3.plot(range(1, layers+1),sim_c,label="Single-pathway",marker='o',color=chaincolor)
+    ax3.fill_between(range(1, layers+1), y1=sim_c_ci_lower,y2=sim_c_ci_upper, alpha=0.3)
+    ax3.legend()
+    ax3.set_xlabel("$k$, Generation")
+    if ylabel:
+        ax3.set_ylabel("$\\theta_r$, Replicate-similarity")
+    sns.despine(ax=ax3, bottom=True, left=True)
+    ax3.grid(axis="y")
+    [ymin, ymax] = ax3.get_ylim()
+    ax3.set_ylim([0, ymax])
+
+    #     Load seed similarity data
+    sim_n = np.load(data_path+"multi-path_data_seed_similarity.npy")
+    sim_c = np.load(data_path+"single-path_data_seed_similarity.npy")
+    sim_n_ci_lower = np.load(data_path+"multi-path_data_seed_similarity_CI_lower.npy")
+    sim_n_ci_upper=np.load(data_path+"multi-path_data_seed_similarity_CI_upper.npy")
+    sim_c_ci_lower=np.load(data_path+"single-path_data_seed_similarity_CI_lower.npy")
+    sim_c_ci_upper=np.load(data_path+"single-path_data_seed_similarity_CI_upper.npy")
+    yerr_=np.empty((2,layers))
+    yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
+    yerr_c[1,:]=np.array(sim_n_ci_upper)-sim_n
+    
+    #     Plot seed similarities with confidence intervals
+    ax4 = fig4.add_subplot(1,3,1)
+    ax4.plot(range(1, layers+1),sim_n,label="Multiple-pathway",marker='o',color=netcolor)
+    ax4.fill_between(range(1, layers+1), y1=sim_n_ci_lower,y2=sim_n_ci_upper, alpha=0.3)
+    ax4.plot(range(1, layers+1),sim_c,label="Single-pathway",marker='o',color=chaincolor)
+    ax4.fill_between(range(1, layers+1), y1=sim_c_ci_lower,y2=sim_c_ci_upper, alpha=0.3)
+    ax4.legend()
+    ax4.set_xlabel("$k$, Generation")
+    if ylabel:
+        ax4.set_ylabel("$\\theta_s$, Seed-similarity")
+    sns.despine(ax=ax4, bottom=True, left=True)
+    ax4.grid(axis="y")
+    [ymin, ymax] = ax4.get_ylim()
+    ax4.set_ylim([0, ymax])
+
+# OPTIONAL - SAVE FIGURES TO results FOLDER
+    figures_path="results/"
+#     fig1.savefig(f"{figures_path}ABM_initialWordDistribution.pdf", bbox_inches="tight")   
+#     fig3.savefig(f"{figures_path}ABM_.pdf", bbox_inches="tight")   
+    fig3.savefig(f"{figures_path}ABM_replicatesimilarity.pdf", bbox_inches="tight")   
+    fig4.savefig(f"{figures_path}ABM_seedsimilarity.pdf", bbox_inches="tight")  
+    
+    
+    
+def load_and_plot_data(data_path="../data/simulation_data/",netcolor='#3d348b', chaincolor='#e6af2e',layers = 6,
+                       seed_length=265, n_reps = 100, extra_w = 20, extra_intro_rate = 0.05, extra_baseline_prob = 0.1):
+    
+    # Define plots
+    fig1 = plt.figure(figsize=(16,3))
+    fig2 = plt.figure(figsize=(16,3))
+    fig3 = plt.figure(figsize=(16,3))
+    fig4 = plt.figure(figsize=(16,3))
+   
+    prob=np.loadtxt(data_path+"prob_data.csv",delimiter=",")
+    total_length = seed_length + extra_w
+    
+    ylabel=True
+    
+    
+    all_results_n = np.load(data_path+"multi-path_data.npy")
+    all_results_c = np.load(data_path+"single-path_data.npy")
+
+
+    
+    results_n = np.zeros((n_reps,total_length))
+    results_c = np.zeros((n_reps,total_length))
+    words_n = np.zeros((n_reps,layers))
+    words_c = np.zeros((n_reps,layers))
+    
+    for i in range(n_reps): 
+        results_n[i,:] = all_results_n[i][:, -1, :].mean(1)
+        results_c[i,:] = all_results_c[i][:, -1]
+        words_n[i,:] = all_results_n[i].mean(2).sum(0)
+        words_c[i,:] = all_results_c[i].sum(0)
+    
     # average across replicates
     results_n = results_n.mean(0)
     results_c = results_c.mean(0)
@@ -553,10 +843,25 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
     sns.despine(ax=ax2)
 
     #     Compute replicate similarities along with confidence intervals for each condition 
-    sim_n = calculate_similarity(all_results_n) 
-    sim_c = calculate_similarity(all_results_c) 
-    sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n)
-    sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c)
+#     sim_n = calculate_similarity(all_results_n) 
+#     sim_c = calculate_similarity(all_results_c) 
+#     sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n)
+#     sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c)
+#     yerr_n=np.empty((2,layers))
+#     yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
+#     yerr_n[1,:]=np.array(sim_n_ci_upper)-sim_n
+#     yerr_c=np.empty((2,layers))
+#     yerr_c[0,:]=sim_c-np.array(sim_c_ci_lower)
+#     yerr_c[1,:]=np.array(sim_c_ci_upper)-sim_c
+    
+#     Load replicate similarity data
+    sim_n = np.load(data_path+"multi-path_data_rep_similarity.npy")
+    sim_c = np.load(data_path+"single-path_data_rep_similarity.npy")
+    sim_n_ci_lower = np.load(data_path+"multi-path_data_rep_similarity_CI_lower.npy")
+    sim_n_ci_upper=np.load(data_path+"multi-path_data_rep_similarity_CI_upper.npy")
+    sim_c_ci_lower=np.load(data_path+"single-path_data_rep_similarity_CI_lower.npy")
+    sim_c_ci_upper=np.load(data_path+"single-path_data_rep_similarity_CI_upper.npy")
+    
     yerr_n=np.empty((2,layers))
     yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
     yerr_n[1,:]=np.array(sim_n_ci_upper)-sim_n
@@ -576,16 +881,30 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
         ax3.set_ylabel("$\\theta_r$, Replicate-similarity")
     sns.despine(ax=ax3, bottom=True, left=True)
     ax3.grid(axis="y")
+    [ymin, ymax] = ax3.get_ylim()
+    ax3.set_ylim([0, ymax])
 
     #     Compute seed similarities along with confidence intervals for each condition 
-    sim_n = calculate_similarity(all_results_n, original=True,story_length=seed_length) 
-    sim_c = calculate_similarity(all_results_c, original=True,story_length=seed_length) 
-    sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n, original=True,story_length=seed_length)
-    sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c, original=True,story_length=seed_length)
+#     sim_n = calculate_similarity(all_results_n, original=True,story_length=seed_length) 
+#     sim_c = calculate_similarity(all_results_c, original=True,story_length=seed_length) 
+#     sim_n_ci_lower,sim_n_ci_upper=calculate_sim_ci(all_results_n, original=True,story_length=seed_length)
+#     sim_c_ci_lower,sim_c_ci_upper=calculate_sim_ci(all_results_c, original=True,story_length=seed_length)
+#     yerr_=np.empty((2,layers))
+#     yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
+#     yerr_c[1,:]=np.array(sim_n_ci_upper)-sim_n
+
+    
+    #     Load seed similarity data
+    sim_n = np.load(data_path+"multi-path_data_seed_similarity.npy")
+    sim_c = np.load(data_path+"single-path_data_seed_similarity.npy")
+    sim_n_ci_lower = np.load(data_path+"multi-path_data_seed_similarity_CI_lower.npy")
+    sim_n_ci_upper=np.load(data_path+"multi-path_data_seed_similarity_CI_upper.npy")
+    sim_c_ci_lower=np.load(data_path+"single-path_data_seed_similarity_CI_lower.npy")
+    sim_c_ci_upper=np.load(data_path+"single-path_data_seed_similarity_CI_upper.npy")
     yerr_=np.empty((2,layers))
     yerr_n[0,:]=sim_n-np.array(sim_n_ci_lower)
     yerr_c[1,:]=np.array(sim_n_ci_upper)-sim_n
-
+    
     #     Plot seed similarities with confidence intervals
     ax4 = fig4.add_subplot(1,3,1)
     ax4.plot(range(1, layers+1),sim_n,label="Multiple-pathway",marker='o',color=netcolor)
@@ -598,16 +917,8 @@ def simulate_experiment(prob, layers = 6, seed_length=265, n_reps = 100, extra_w
         ax4.set_ylabel("$\\theta_s$, Seed-similarity")
     sns.despine(ax=ax4, bottom=True, left=True)
     ax4.grid(axis="y")
-
-# OPTIONAL - SAVE FIGURES TO results FOLDER
-    figures_path="results/"
-#     fig1.savefig(f"{figures_path}ABM_initialWordDistribution.pdf", bbox_inches="tight")   
-#     fig3.savefig(f"{figures_path}ABM_.pdf", bbox_inches="tight")   
-    fig3.savefig(f"{figures_path}ABM_replicatesimilarity.pdf", bbox_inches="tight")   
-    fig4.savefig(f"{figures_path}ABM_seedsimilarity.pdf", bbox_inches="tight")  
-
-
-
+    [ymin, ymax] = ax4.get_ylim()
+    ax4.set_ylim([0, ymax])
 
 
 
