@@ -1,13 +1,13 @@
-Replication code for paper `Redundancy in transmission promotes information consensus across independent social networks`.
+Replication code for paper `Social Transmission along Multiple Pathways Promotes Information Fidelity and Reduces Divisiveness`.
 
 # Citation
-Paper (arxiv for now) + code/data (zenodo DOI)
+Paper (arxiv for now) + code/data (zenodo DOI `10.5281/zenodo.15641902`)
 
 
 # Replication of the analysis
-- Download data from Zenodo --> xxx
+- Download data from Zenodo
 - Create a conda environment using environment.yml: `conda env create -f environment.yml`
-- Run notebooks in `analysis` folder using the `rumor` environment that you just created
+- Run notebooks 2 and 3 in the `analysis` folder using the `rumor` environment that you just created.
 
 
 # Replication of the experiment
